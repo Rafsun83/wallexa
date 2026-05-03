@@ -13,16 +13,17 @@ export const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Attach access token to every request
+let onUnauthorized = null;
+export function setUnauthorizedCallback(cb) {
+  onUnauthorized = cb;
+}
+
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem(STORAGE.ACCESS);
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// On 401, clear auth and redirect to signin
 apiClient.interceptors.response.use(
   (res) => res,
   (err) => {
@@ -30,9 +31,7 @@ apiClient.interceptors.response.use(
       localStorage.removeItem(STORAGE.ACCESS);
       localStorage.removeItem(STORAGE.REFRESH);
       localStorage.removeItem(STORAGE.USER);
-      if (window.location.pathname !== '/signin') {
-        window.location.href = '/signin';
-      }
+      onUnauthorized?.();
     }
     return Promise.reject(err);
   }

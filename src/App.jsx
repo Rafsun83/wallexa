@@ -1,13 +1,21 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
+import AppShell from './components/AppShell';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Home from './pages/Home';
+import Wallets from './pages/Wallets';
+import Settings from './pages/Settings';
 
-function ProtectedRoute({ children }) {
-  const { auth } = useAuth();
+function ProtectedRoute() {
+  const { auth, isVerifying } = useAuth();
+  if (isVerifying) return (
+    <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
+      <span className="spinner" />
+    </div>
+  );
   if (!auth) return <Navigate to="/signin" replace />;
-  return children;
+  return <Outlet />;
 }
 
 function PublicRoute({ children }) {
@@ -21,7 +29,15 @@ export default function App() {
     <Routes>
       <Route path="/signin" element={<PublicRoute><SignIn /></PublicRoute>} />
       <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
-      <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppShell />}>
+          <Route path="/home"     element={<Home />} />
+          <Route path="/wallets"  element={<Wallets />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
+      </Route>
+
       <Route path="*" element={<Navigate to="/signin" replace />} />
     </Routes>
   );
