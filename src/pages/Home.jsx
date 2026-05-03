@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 import { useWallets } from '../hooks/useWallets';
 import { useCreateWalletMutation, useCreateTransactionMutation } from '../hooks/useWalletMutations';
 import { useUserQuery } from '../hooks/useUser';
@@ -24,6 +24,7 @@ function Toast({ toasts }) {
 }
 
 export default function Home() {
+  const navigate = useNavigate();
   const { data: user } = useUserQuery();
   const { wallets, isLoading, error, transactions, addMoney } = useWallets();
   const createWalletMutation     = useCreateWalletMutation();
@@ -136,7 +137,7 @@ export default function Home() {
 
       <div className="section-head">
         <h2>Recent transactions</h2>
-        <button className="link">View all →</button>
+        <button className="link" onClick={() => navigate('/transactions')}>View all →</button>
       </div>
       <div className="tx-card">
         {transactions.length === 0 ? (

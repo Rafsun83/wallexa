@@ -6,6 +6,7 @@ import SignUp from './pages/SignUp';
 import Home from './pages/Home';
 import Wallets from './pages/Wallets';
 import Transactions from './pages/Transactions';
+import Insights from './pages/Insights';
 import Settings from './pages/Settings';
 
 function ProtectedRoute() {
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/home"         element={<Home />} />
           <Route path="/wallets"      element={<Wallets />} />
           <Route path="/transactions" element={<Transactions />} />
+          <Route path="/insights"     element={<Insights />} />
           <Route path="/settings"     element={<Settings />} />
         </Route>
       </Route>
