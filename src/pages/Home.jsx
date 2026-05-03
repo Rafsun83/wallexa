@@ -184,6 +184,106 @@ function StatementModal({ wallet, transactions, onClose }) {
     URL.revokeObjectURL(url);
   };
 
+  const downloadPDF = () => {
+    const balFmt = formatMoney(wallet.balance, wallet.currency);
+    const inFmt  = formatMoney(totalIn,        wallet.currency);
+    const outFmt = formatMoney(totalOut,        wallet.currency);
+    const themeColor = THEME_BG[wallet.theme] || THEME_BG.emerald;
+    const generatedOn = new Date().toLocaleDateString('en', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    const txRows = walletTx.map((tx) => {
+      const d  = new Date(tx.ts);
+      const mf = formatMoney(tx.amount, wallet.currency);
+      const isIn = tx.kind === 'in';
+      return `
+        <tr>
+          <td>${d.toLocaleDateString('en')}</td>
+          <td>${d.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })}</td>
+          <td>${tx.title}</td>
+          <td>${tx.merchant}</td>
+          <td><span class="${isIn ? 'credit' : 'debit'}">${isIn ? 'CREDIT' : 'DEBIT'}</span></td>
+          <td class="amount ${isIn ? 'credit' : 'debit'}">${isIn ? '+' : '−'}${mf.sym}${mf.int}.${mf.dec}</td>
+        </tr>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${wallet.name} Statement</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #06121f; background: #fff; padding: 40px; font-size: 13px; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 2px solid ${themeColor}; }
+    .brand { font-size: 22px; font-weight: 700; color: ${themeColor}; letter-spacing: -0.02em; }
+    .brand span { display: block; font-size: 12px; font-weight: 400; color: #5a7591; margin-top: 2px; letter-spacing: 0; }
+    .meta { text-align: right; font-size: 12px; color: #5a7591; line-height: 1.7; }
+    .meta strong { color: #06121f; }
+    .summary { display: flex; gap: 0; border: 1px solid #e6edf5; border-radius: 10px; overflow: hidden; margin-bottom: 28px; }
+    .summary-cell { flex: 1; padding: 14px 18px; border-right: 1px solid #e6edf5; }
+    .summary-cell:last-child { border-right: none; }
+    .summary-cell .lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #8ea4be; margin-bottom: 4px; }
+    .summary-cell .val { font-size: 17px; font-weight: 700; font-family: 'Courier New', monospace; }
+    .val.bal { color: #06121f; }
+    .val.crd { color: #006b54; }
+    .val.dbt { color: #9b1c2c; }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: ${themeColor}; color: #fff; }
+    thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+    tbody tr { border-bottom: 1px solid #e6edf5; }
+    tbody tr:nth-child(even) { background: #f4f7fb; }
+    td { padding: 10px 12px; vertical-align: middle; }
+    .amount { font-family: 'Courier New', monospace; font-weight: 600; text-align: right; }
+    .credit { color: #006b54; }
+    .debit  { color: #9b1c2c; }
+    span.credit { background: #e0f7ee; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+    span.debit  { background: #fde7ea; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+    .footer { margin-top: 28px; font-size: 11px; color: #8ea4be; text-align: center; border-top: 1px solid #e6edf5; padding-top: 14px; }
+    @media print {
+      body { padding: 20px; }
+      @page { margin: 1cm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="brand">Wallexa <span>Account Statement</span></div>
+      <div style="margin-top:10px;font-size:13px;color:#06121f;">
+        <strong>${wallet.name}</strong> &nbsp;·&nbsp; ${wallet.type} &nbsp;·&nbsp; ${wallet.currency}
+      </div>
+    </div>
+    <div class="meta">
+      <div>Generated on <strong>${generatedOn}</strong></div>
+      <div>Total transactions: <strong>${walletTx.length}</strong></div>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="summary-cell"><div class="lbl">Balance</div><div class="val bal">${balFmt.sym}${balFmt.int}.${balFmt.dec}</div></div>
+    <div class="summary-cell"><div class="lbl">Total Credited</div><div class="val crd">+${inFmt.sym}${inFmt.int}.${inFmt.dec}</div></div>
+    <div class="summary-cell"><div class="lbl">Total Debited</div><div class="val dbt">−${outFmt.sym}${outFmt.int}.${outFmt.dec}</div></div>
+  </div>
+
+  ${walletTx.length === 0
+    ? '<p style="text-align:center;color:#8ea4be;padding:32px;">No transactions found for this wallet.</p>'
+    : `<table>
+        <thead><tr><th>Date</th><th>Time</th><th>Description</th><th>Category</th><th>Type</th><th style="text-align:right">Amount</th></tr></thead>
+        <tbody>${txRows}</tbody>
+      </table>`
+  }
+
+  <div class="footer">This statement was generated automatically by Wallexa. &nbsp;·&nbsp; ${generatedOn}</div>
+
+  <script>window.onload = () => { window.print(); }<\/script>
+</body>
+</html>`;
+
+    const win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
+  };
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div
@@ -280,9 +380,14 @@ function StatementModal({ wallet, transactions, onClose }) {
         <div className="modal-foot">
           <button className="btn btn-ghost" onClick={onClose}>Close</button>
           {walletTx.length > 0 && (
-            <button className="btn btn-primary" onClick={downloadCSV}>
-              <Icon.download /> Download CSV
-            </button>
+            <>
+              <button className="btn btn-ghost" onClick={downloadCSV}>
+                <Icon.download /> CSV
+              </button>
+              <button className="btn btn-primary" onClick={downloadPDF}>
+                <Icon.download /> Download PDF
+              </button>
+            </>
           )}
         </div>
       </div>
