@@ -8,8 +8,13 @@ export function AuthProvider({ children }) {
     try {
       const access = localStorage.getItem(STORAGE.ACCESS);
       const refresh = localStorage.getItem(STORAGE.REFRESH);
-      const user = JSON.parse(localStorage.getItem(STORAGE.USER) || 'null');
-      if (access && user) return { accessToken: access, refreshToken: refresh, user };
+      if (!access) return null;
+      let user = null;
+      try {
+        const raw = localStorage.getItem(STORAGE.USER);
+        if (raw) user = JSON.parse(raw);
+      } catch {}
+      return { accessToken: access, refreshToken: refresh, user };
     } catch (e) {}
     return null;
   });
