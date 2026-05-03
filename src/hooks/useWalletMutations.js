@@ -8,3 +8,15 @@ export function useCreateWalletMutation() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['wallets'] }),
   });
 }
+
+export function useCreateTransactionMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ walletId, ...payload }) =>
+      walletsApi.createTransaction(walletId, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['transactions', String(variables.walletId)] });
+      queryClient.invalidateQueries({ queryKey: ['wallets'] });
+    },
+  });
+}

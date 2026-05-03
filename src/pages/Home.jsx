@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useWallets } from '../hooks/useWallets';
-import { useCreateWalletMutation } from '../hooks/useWalletMutations';
+import { useCreateWalletMutation, useCreateTransactionMutation } from '../hooks/useWalletMutations';
 import { useUserQuery } from '../hooks/useUser';
 import { Icon } from '../components/Icon';
 import { WalletCard } from '../components/WalletCard';
@@ -26,7 +26,8 @@ function Toast({ toasts }) {
 export default function Home() {
   const { data: user } = useUserQuery();
   const { wallets, isLoading, error, transactions, addMoney } = useWallets();
-  const createWalletMutation = useCreateWalletMutation();
+  const createWalletMutation     = useCreateWalletMutation();
+  const createTransactionMutation = useCreateTransactionMutation();
 
   const [showCreate, setShowCreate]       = useState(false);
   const [detailWalletId, setDetailWalletId] = useState(null);
@@ -57,10 +58,15 @@ export default function Home() {
     pushToast(`Wallet "${formData.walletName}" created`);
   };
 
-  const handleAddMoney = (walletId, amount, label) => {
-    addMoney(walletId, amount, label);
-    const w = wallets.find((x) => x.id === walletId);
-    pushToast(`Added ${formatMoney(amount, w?.currency).sym}${amount.toFixed(2)} to ${w?.name}`);
+  const handleAddMoney = async (walletId, txData) => {
+    await createTransactionMutation.mutateAsync({ walletId, ...txData });
+    addMoney(walletId, txData);
+    const w   = wallets.find((x) => x.id === walletId);
+    const sym = formatMoney(txData.amount, w?.currency).sym;
+    const msg = txData.type === 'DEBIT'
+      ? `Debited ${sym}${txData.amount.toFixed(2)} from ${w?.name}`
+      : `Added ${sym}${txData.amount.toFixed(2)} to ${w?.name}`;
+    pushToast(msg);
   };
 
   return (

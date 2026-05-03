@@ -113,40 +113,13 @@ export function WalletDetailModal({ walletId, onClose, onAddMoney }) {
               </div>
 
               <div style={{ marginTop: 8 }}>
-                <DetailRow label="Wallet name" value={wallet.name} />
-                <DetailRow
-                  label="Balance"
-                  value={`${m.sym}${m.int}.${m.dec}`}
-                />
-                <DetailRow label="Currency" value={wallet.currency} />
-                <DetailRow label="Type" value={wallet.type} />
-                <DetailRow label="Category" value={wallet.category} />
-                <DetailRow
-                  label="Created"
-                  value={formatRelTime(wallet.createdAt)}
-                />
-                {wallet.note && (
-                  <div style={{ padding: "10px 0" }}>
-                    <div
-                      style={{
-                        fontSize: 13,
-                        color: "var(--ink-400)",
-                        marginBottom: 4,
-                      }}
-                    >
-                      Note
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 13,
-                        color: "var(--ink-700)",
-                        fontStyle: "italic",
-                      }}
-                    >
-                      {wallet.note}
-                    </div>
-                  </div>
-                )}
+                <DetailRow label="Wallet name"  value={wallet.name} />
+                <DetailRow label="Balance"      value={`${m.sym}${m.int}.${m.dec}`} />
+                <DetailRow label="Currency"     value={wallet.currency} />
+                <DetailRow label="Type"         value={wallet.type} />
+                <DetailRow label="Category"     value={wallet.category} />
+                <DetailRow label="Created"      value={formatRelTime(wallet.createdAt)} />
+                <DetailRow label="Description"  value={wallet.note} />
               </div>
             </>
           )}
