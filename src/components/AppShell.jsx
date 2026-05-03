@@ -33,7 +33,7 @@ export default function AppShell() {
   const navItems = [
     { id: 'home',     label: 'Overview',     icon: Icon.home },
     { id: 'wallets',  label: 'Wallets',      icon: Icon.wallet, path: '/wallets', badge: wallets.length },
-    { id: 'tx',       label: 'Transactions', icon: Icon.arrows },
+    { id: 'tx',       label: 'Transactions', icon: Icon.arrows, path: '/transactions' },
     { id: 'insights', label: 'Insights',     icon: Icon.chart },
   ];
 

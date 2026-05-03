@@ -5,6 +5,7 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Home from './pages/Home';
 import Wallets from './pages/Wallets';
+import Transactions from './pages/Transactions';
 import Settings from './pages/Settings';
 
 function ProtectedRoute() {
@@ -32,9 +33,10 @@ export default function App() {
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppShell />}>
-          <Route path="/home"     element={<Home />} />
-          <Route path="/wallets"  element={<Wallets />} />
-          <Route path="/settings" element={<Settings />} />
+          <Route path="/home"         element={<Home />} />
+          <Route path="/wallets"      element={<Wallets />} />
+          <Route path="/transactions" element={<Transactions />} />
+          <Route path="/settings"     element={<Settings />} />
         </Route>
       </Route>
 
