@@ -11,9 +11,12 @@ export function AddMoneyModal({ wallet, onClose, onConfirm }) {
   const [submitting, setSubmitting] = useState(false);
   const [error,      setError]      = useState(null);
 
-  const num   = parseFloat(amount);
-  const valid = !isNaN(num) && num > 0;
-  const m     = formatMoney(0, wallet.currency);
+  const num            = parseFloat(amount);
+  const hasBalance     = wallet.balance > 0;
+  const overdrawn      = type === 'DEBIT' && !isNaN(num) && num > wallet.balance;
+  const valid          = !isNaN(num) && num > 0 && !overdrawn;
+  const m              = formatMoney(0, wallet.currency);
+  const balanceFmt     = formatMoney(wallet.balance, wallet.currency);
 
   const submit = async () => {
     if (!valid) return;
@@ -30,16 +33,19 @@ export function AddMoneyModal({ wallet, onClose, onConfirm }) {
 
   const presets = [50, 100, 500, 1000];
 
-  const typeBtn = (t, label, color) => (
+  const typeBtn = (t, label, color, disabled) => (
     <button
       type="button"
-      onClick={() => setType(t)}
+      onClick={() => !disabled && setType(t)}
+      disabled={disabled}
+      title={disabled ? 'Wallet balance is zero — nothing to debit' : undefined}
       style={{
         flex: 1, padding: '9px 0', borderRadius: 8, border: '1.5px solid',
-        fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all .15s',
-        borderColor: type === t ? color : 'var(--ink-200)',
-        background:  type === t ? color : 'transparent',
-        color:       type === t ? '#fff' : 'var(--ink-400)',
+        fontSize: 13, fontWeight: 600, cursor: disabled ? 'not-allowed' : 'pointer',
+        transition: 'all .15s', opacity: disabled ? .45 : 1,
+        borderColor: type === t && !disabled ? color : 'var(--ink-200)',
+        background:  type === t && !disabled ? color : 'transparent',
+        color:       type === t && !disabled ? '#fff' : 'var(--ink-400)',
       }}
     >
       {label}
@@ -58,9 +64,14 @@ export function AddMoneyModal({ wallet, onClose, onConfirm }) {
           <div className="field">
             <label>Type</label>
             <div style={{ display: 'flex', gap: 8 }}>
-              {typeBtn('CREDIT', '+ Credit',  '#0a7c57')}
-              {typeBtn('DEBIT',  '− Debit',   '#c0392b')}
+              {typeBtn('CREDIT', '+ Credit', '#0a7c57')}
+              {typeBtn('DEBIT',  '− Debit',  '#c0392b', !hasBalance)}
             </div>
+            {!hasBalance && (
+              <div style={{ fontSize: 12.5, color: 'var(--ink-400)', marginTop: 6 }}>
+                Debit is unavailable — this wallet has no balance.
+              </div>
+            )}
           </div>
 
           <div className="field">
@@ -76,12 +87,28 @@ export function AddMoneyModal({ wallet, onClose, onConfirm }) {
                 style={{ fontSize: 22, fontFamily: 'var(--font-display)', height: 56, fontWeight: 500 }}
               />
             </div>
+            {type === 'DEBIT' && (
+              <div style={{ fontSize: 12.5, color: 'var(--ink-400)', marginTop: 8 }}>
+                Available balance:&nbsp;
+                <strong style={{ color: 'var(--ink-700)', fontFamily: 'var(--font-mono)' }}>
+                  {balanceFmt.sym}{balanceFmt.int}.{balanceFmt.dec}
+                </strong>
+              </div>
+            )}
+            {overdrawn && (
+              <div style={{ color: 'var(--danger-700)', background: 'var(--danger-100)', padding: '7px 11px', borderRadius: 8, fontSize: 12.5, marginTop: 8 }}>
+                Amount exceeds available balance of {balanceFmt.sym}{balanceFmt.int}.{balanceFmt.dec}
+              </div>
+            )}
             <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
-              {presets.map((p) => (
-                <button key={p} type="button" className="btn btn-ghost btn-sm" onClick={() => setAmount(String(p))}>
-                  {m.sym}{p}
-                </button>
-              ))}
+              {presets
+                .filter((p) => type === 'CREDIT' || p <= wallet.balance)
+                .map((p) => (
+                  <button key={p} type="button" className="btn btn-ghost btn-sm" onClick={() => setAmount(String(p))}>
+                    {m.sym}{p}
+                  </button>
+                ))
+              }
             </div>
           </div>
 
