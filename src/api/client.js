@@ -1,16 +1,18 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "https://localhost/self_management";
+// 'http://localhost:8080';
 
 export const STORAGE = {
-  ACCESS: 'wallet.accessToken',
-  REFRESH: 'wallet.refreshToken',
-  USER: 'wallet.user',
+  ACCESS: "wallet.accessToken",
+  REFRESH: "wallet.refreshToken",
+  USER: "wallet.user",
 };
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
+  headers: { "Content-Type": "application/json" },
 });
 
 let onUnauthorized = null;
@@ -34,5 +36,5 @@ apiClient.interceptors.response.use(
       onUnauthorized?.();
     }
     return Promise.reject(err);
-  }
+  },
 );
