@@ -26,10 +26,10 @@ export function uid() {
 }
 
 export function getDeviceId() {
-  // let id = localStorage.getItem('wallet.deviceId');
-  // if (!id) {
-  id = "web-" + Math.random().toString(36).slice(2, 10);
-  localStorage.setItem("wallet.deviceId", id);
-  // }
+  let id = localStorage.getItem("wallet.deviceId");
+  if (!id) {
+    id = "web-" + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem("wallet.deviceId", id);
+  }
   return id;
 }
