@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://100.81.184.67/self_management";
-// 'http://localhost:8080'; "https://localhost/self_management";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+// 'http://localhost:8080'; "https://localhost/self_management" "https://100.81.184.67/self_management";
 
 export const STORAGE = {
   ACCESS: "wallet.accessToken",

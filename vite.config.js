@@ -5,7 +5,7 @@ export default defineConfig({
   // base: "/wallexa/",
   plugins: [react()],
   server: {
-    port: 5173,
+    port: 3001,
     open: true,
   },
 });
