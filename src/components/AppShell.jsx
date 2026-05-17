@@ -5,6 +5,7 @@ import { useLogoutMutation } from '../hooks/useAuthMutations';
 import { useUserQuery } from '../hooks/useUser';
 import { useWalletsQuery } from '../hooks/useWallets';
 import { Icon } from './Icon';
+import NotificationPanel from './NotificationPanel';
 
 export default function AppShell() {
   const navigate  = useNavigate();
@@ -54,9 +55,12 @@ export default function AppShell() {
   return (
     <div className="app-shell">
       <aside className="app-side">
-        <div className="auth-brand">
-          <div className="logo-mark"></div>
-          <span>Wallet</span>
+        <div className="app-side-head">
+          <div className="auth-brand" style={{ padding: 0 }}>
+            <div className="logo-mark"></div>
+            <span>Wallet</span>
+          </div>
+          <NotificationPanel />
         </div>
 
         <div className="nav-section">Main</div>
